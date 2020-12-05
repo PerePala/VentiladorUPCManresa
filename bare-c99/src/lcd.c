@@ -117,6 +117,14 @@ void lcd_clear(lcd_t l) {
   _delay_ms(2);   //Atention!
 }
 
+/*
+ * Clears the LCD display without blocking. It needs 2ms to execute,
+ * so make sure not to send other commands during this time.
+ * @param l The LCD object that must be cleared
+ */
+void lcd_clear_without_delay(lcd_t l) {
+  lcd_send(l, LCD_COMMAND, LCD_CLEARDISPLAY);
+}
 
 
 /*

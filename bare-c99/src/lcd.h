@@ -79,6 +79,7 @@ void lcd_on(lcd_t l);
 void lcd_off(lcd_t l);
 
 void lcd_clear(lcd_t l);
+void lcd_clear_without_delay(lcd_t l);
 void lcd_return_home(lcd_t l);
 
 void lcd_enable_blinking(lcd_t l);
