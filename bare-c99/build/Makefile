@@ -3,7 +3,7 @@
 PLATFORM = ArduinoONE
 SHIELD   = ShieldITIC
 
-DEVICE=/dev/ttyACM0
+DEVICE=COM5
 
 CC=avr-gcc
 CPPFLAGS=
@@ -13,17 +13,20 @@ LDFLAGS=-std=c99
 #################################################################
 
 SRC_MODS = adc motor shielditic ticker vaction \
-           pin switch timer alert queue serial
+           pin switch timer alert queue serial \
+           lcdpcf8574 pcf8574 twimaster ui button \
+           encoder blink
 
 SRC_TESTS = test_timer test_timer2 \
             test_pin \
             test_ticker \
-	    test_adc test_adc_2 \
+	          test_adc test_adc_2 \
             test_switch_1 test_switch_2 test_switch_3 \
             test_lcd \
             test_alert_1 \
-	    test_serial_1 test_serial_2 test_serial_3 test_serial_4 \
-            test_serial_5
+	          test_serial_1 test_serial_2 test_serial_3 test_serial_4 \
+            test_serial_5 \
+            test_lcd_i2c
 
 SRC_MAIN = main
 
@@ -31,6 +34,7 @@ SRC_MAIN = main
 # Link rules
 
 main: vaction.o timer.o motor.o
+ui: lcdpcf8574.o pcf8574.o twimaster.o ticker.o pin.o button.o encoder.o blink.o
 test_adc: adc.o ticker.o shielditic.o alert.o pin.o
 test_adc_2: adc.o ticker.o shielditic.o alert.o pin.o
 test_lcd: lcd.o
@@ -48,6 +52,7 @@ test_serial_2: serial.o queue.o
 test_serial_3: serial.o queue.o adc.o ticker.o alert.o pin.o
 test_serial_4: serial.o queue.o adc.o ticker.o alert.o pin.o
 test_serial_5: serial.o queue.o adc.o ticker.o alert.o pin.o
+test_lcd_i2c: lcdpcf8574.o pcf8574.o twimaster.o
 
 
 #################################################################
@@ -122,7 +127,7 @@ veryclean: clean
 	avr-objcopy -Oihex  $< $@
 
 implanta_%: %.hex
-	avrdude $(DUDEOPTS) -c $(PROGRAMMER) -p $(MCU) -P $(DEVICE) -U $<
+	/mnt/c/WinAVR-20100110/bin/avrdude.exe $(DUDEOPTS) -c $(PROGRAMMER) -p $(MCU) -P $(DEVICE) -U $<
 
 %.s: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -S $<
