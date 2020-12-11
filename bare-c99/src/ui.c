@@ -28,9 +28,12 @@
 //MACHINE STATUS
 #define STOP 0
 #define WORKING 1
+
 uint8_t machine_status = STOP;
 
+//Defines the first screen to be load
 uint8_t ui_status = STARTING;
+
 uint8_t last_ui_status = 99;
 
 display_item starting_items[START_SC_ITEMS_NUM];
@@ -56,19 +59,16 @@ button_t buttons[NUM_OF_BUTTONS];
 encoder_t encoder;
 #define ENCODER_REFRESH_TIME 1
 
-//TEMP
-uint16_t volume_param = 300;
-
 
 /**
- @brief     Sets the selected screen status to be displayed asynchronously
+ * @brief     Sets the selected screen status to be displayed asynchronously
  */
 void set_UI_status(uint8_t status_id) {
   ui_status = status_id;
 }
 
 /**
-@brief      Gets the current screen status
+ * @brief      Gets the current screen status
  */
 uint8_t get_UI_status(void){
   return ui_status;
@@ -122,20 +122,32 @@ void select_param(int8_t param_id) {
 
 
 void set_value_selected_param(int8_t difference) {
+  display_item *item;
   switch (ui_status) {
     case STARTING:
-        starting_items[selected_param].value += (difference * starting_items[selected_param].step_val);
-        starting_items[selected_param].is_changed = true;
+        item = &starting_items[selected_param];
       break;
     case MAIN_SCREEN:
-        main_items[selected_param].value += (difference * main_items[selected_param].step_val);
-        main_items[selected_param].is_changed = true;
+        item = &main_items[selected_param];
       break;
     case MENU:
-        menu_items[selected_param].value += (difference * menu_items[selected_param].step_val);
-        menu_items[selected_param].is_changed = true;
+        item = &menu_items[selected_param];
       break;
+    default:
+      return;
   }
+  //Calculate 
+  item->value += (difference * item->step_val);
+  
+  //Check limits (min & max)
+  if (item->value > item->max_val){
+    item->value = item->max_val;
+  } else if (item->value < item->min_val){
+    item->value = item->min_val;
+  }
+
+  item->is_changed = true;
+
 }
 
 
@@ -157,6 +169,11 @@ void blink_item_value(display_item *item){
   }
 }
 
+
+
+/**
+ * @brief Creates and send the custom charmaps to the LCD
+ */
 void create_custom_chars(void) {
   lcd_create_custom_char(U,U_char);
   lcd_create_custom_char(P,P_char);

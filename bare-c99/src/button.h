@@ -10,8 +10,8 @@
 #define CLICKED     1   //When a rising edge is detected
 #define PRESSED     2
 
-/*
- * Type to define a button item
+/**
+ * @brief Type to define a button
  */
 typedef struct {
   pin_t pin;

@@ -48,6 +48,8 @@ typedef struct display_items {
   char *val_format;
   uint8_t value_col;
   uint8_t value_row;
+  uint16_t min_val;
+  uint16_t max_val;
   bool is_blinking;
   bool is_changed;
   uint8_t step_val;
@@ -59,75 +61,85 @@ typedef struct display_items {
  *************************************/
 display_item volume = {
   "VOLUME",
-  0, //Label Column
-  2,  //Label Row
-  400, //Value
+  0,      //Label Column
+  2,      //Label Row
+  400,    //Value
   "%u",   //Value's format
-  1, //Value Column
-  3,  //Value Row
-  false, //Blinking
-  false, //Is changed
+  1,      //Value Column
+  3,      //Value Row
+  150,    //Min Value
+  450,    //Max Value
+  false,  //Blinking
+  false,  //Is changed
   2       //Step value
 };
 
 display_item ratio = {
   "I:R",
-  9, //Label Column
-  2,  //Label Row
-  1, //Value     **************Canviar******************
-  "1:%u",   //Value's format
-  9, //Value Column
-  3,  //Value Row
-  false, //Blinking
-  false, //Is changed
+  9,      //Label Column
+  2,      //Label Row
+  1,      //Value     **************Canviar******************
+  "1:%u", //Value's format
+  9,      //Value Column
+  3,      //Value Row
+  1,      //Min Value
+  4,      //Max Value
+  false,  //Blinking
+  false,  //Is changed
   1       //Step value
 };
 
 display_item freq = {
   "FREQ",
-  16, //Label Column
-  2,  //Label Row
-  22, //Value
+  16,     //Label Column
+  2,      //Label Row
+  22,     //Value
   "%u",   //Value's format
-  17, //Value Column
-  3,  //Value Row
-  false, //Blinking
-  false, //Is changed
+  17,     //Value Column
+  3,      //Value Row
+  10,     //Min Value
+  25,     //Max Value
+  false,  //Blinking
+  false,  //Is changed
   1       //Step value
 };
 
 display_item peak = {
   "PEAK:",
-  0, //Label Column
-  0,  //Label Row
-  36, //Value
-  OFF_ST,   //Value's format
-  6, //Value Column
-  0,  //Value Row
-  false, //Blinking
-  false //Is changed
+  0,      //Label Column
+  0,      //Label Row
+  36,     //Value
+  OFF_ST, //Value's format
+  6,      //Value Column
+  0,      //Value Row
+  0,      //Min Value
+  500,    //Max Value
+  false,  //Blinking
+  false   //Is changed
 };
 
 display_item plateau = {
   "PLATEAU:",
-  0, //Label Column
-  1,  //Label Row
-  25, //Value
-  OFF_ST,   //Value's format
-  9, //Value Column
-  1,  //Value Row
-  false, //Blinking
-  false //Is changed
+  0,      //Label Column
+  1,      //Label Row
+  25,     //Value
+  OFF_ST, //Value's format
+  9,      //Value Column
+  1,      //Value Row
+  0,      //Min Value
+  500,    //Max Value
+  false,  //Blinking
+  false   //Is changed
 };
 
 display_item start_stop = {
   " ",
-  12, //Label Column
-  0, //Label Row
-  0,    //Value: Not used
-  START_ST,   //Value's format
-  13,
-  0
+  12,     //Label Column
+  0,      //Label Row
+  0,      //Value: Not used
+  START_ST,//Value's format
+  13,     //Value Column
+  0       //Value Row
 };
 
 
@@ -137,20 +149,20 @@ display_item start_stop = {
 
  display_item upc = {
    UPC_STR,
-   8, //Label Column
-   0  //Label Row
+   8,     //Label Column
+   0      //Label Row
  };
 
  display_item manresa = {
    "Manresa",
-   6, //Label Column
-   1  //Label Row
+   6,     //Label Column
+   1      //Label Row
  };
 
  display_item respirador = {
    "VENTILATOR",
-   5, //Label Column
-   2  //Label Row
+   5,     //Label Column
+   2      //Label Row
  };
 
 
@@ -163,8 +175,8 @@ display_item start_stop = {
 
   display_item menu = {
     "MENU",
-    8, //Label Column
-    0  //Label Row
+    8,    //Label Column
+    0     //Label Row
   };
 
 
