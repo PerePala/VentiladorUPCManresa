@@ -8,11 +8,11 @@
  * enable, step, and direction
  */
 #define ENA_PRT  PORTB
-#define ENA_PIN  0
-#define STP_PRT  PORTD
-#define STP_PIN  2
-#define DIR_PRT  PORTD
-#define DIR_PIN  5
+#define ENA_PIN  4
+#define STP_PRT  PORTB
+#define STP_PIN  3
+#define DIR_PRT  PORTB
+#define DIR_PIN  2
 
 
 /* Macros to get control registers of port */
