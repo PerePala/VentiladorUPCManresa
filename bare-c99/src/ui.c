@@ -13,6 +13,8 @@
 #include "button.h"
 #include "encoder.h"
 #include "blink.h"
+#include "vaction.h"
+
 
 #define REFRESH_TIME 10  //times the ticker freq (10ms)
 
@@ -157,10 +159,17 @@ void change_value_selected_field(int8_t increment) {
 
 
 /**
- * @brief Save the modified value to the corresponding field's struc
+ * @brief Save the modified value to the corresponding field's struc and send it to "vaction" module
  */
 void save_selected_value(){
   selected_field->value = new_selected_value;
+  if (selected_field == &main_form[VOLUME]){
+    vaction_set_tr(selected_field->value);
+  } else if (selected_field == &main_form[RATIO]){
+    vaction_set_ie(selected_field->value * 10);
+  } else if (selected_field == &main_form[FREQ]){
+    vaction_set_rr(selected_field->value * 10);
+  }
 }
 
 
@@ -285,6 +294,15 @@ void print_changed_fields(void){
 }
 
 
+/**
+ * @brief Module setup. Initializes the display, buttons, encoder, and the ticker.
+ */
+void UI_setup(void){
+  ticker_setup();
+  display_init();
+  buttons_init();
+  ticker_start();
+}
 
 /*****************************************************************
  * @brief   Protothread to refresh the display if needed
@@ -397,28 +415,3 @@ PT_THREAD(encoder_thread(struct pt *pt))
 }
 
 
-
-int main(void) {
-  /* context dels threads */
-  struct pt display_ctx, buttons_ctx, encoder_ctx;
-
-  /* init modules */
-  ticker_setup();
-  ticker_start();
-  display_init();
-  buttons_init();
-  sei();
-
-  /* init contexts */
-  PT_INIT(&display_ctx);
-  PT_INIT(&buttons_ctx);
-  PT_INIT(&encoder_ctx);
-
-  /* do schedule of threads */
-  for(;;) {
-    (void)PT_SCHEDULE(buttons_thread(&buttons_ctx));
-    (void)PT_SCHEDULE(encoder_thread(&encoder_ctx));
-    (void)PT_SCHEDULE(display_thread(&display_ctx));
-  }
-  return 0;
-}

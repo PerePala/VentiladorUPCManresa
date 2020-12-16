@@ -67,15 +67,15 @@ field_t main_form[MAIN_FORM_NUM] = {
     "VOLUME",
     0,      //Label Column
     2,      //Label Row
-    400,    //Value
-    UINT_FORMAT,   //Value's format
-    1,      //Value Column
+    50,     //Value
+    "%u%%", //Value's format
+    2,      //Value Column
     3,      //Value Row
-    150,    //Min Value
-    450,    //Max Value
+    10,     //Min Value
+    99,     //Max Value
     false,  //Blinking
     false,  //Is changed
-    2       //Step value
+    1       //Step value
   },
   {
     "I:R",
