@@ -69,12 +69,14 @@ void motor_reverse(void) {
  * only effective while enabled. Disabling avoids power consumption.
  */
 void motor_enable(void) {
-  PORT(ENA_PRT) |= _BV(ENA_PIN);
+  PORT(ENA_PRT) &= ~_BV(ENA_PIN); //Low state = Enabled
 }
 
-
+/*
+ * Disable the motor.
+ */
 void motor_disable(void) {
-  PORT(ENA_PRT) &= ~_BV(ENA_PIN);
+  PORT(ENA_PRT) |= _BV(ENA_PIN); //High state = Disabled
 }  
 
 
