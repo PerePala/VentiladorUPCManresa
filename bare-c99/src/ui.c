@@ -10,7 +10,6 @@
 #include "charmaps.h"
 #include "display_items.h"
 #include "pin.h"
-#include "button.h"
 #include "switch.h"
 #include "encoder.h"
 #include "blink.h"
