@@ -160,8 +160,12 @@ field_t starting_form[STARTING_FORM_NUM] = {
   },
   {
     "VENTILATOR",
-    5,     //Label Column
-    2      //Label Row
+    5,      //Label Column
+    2,      //Label Row
+    2020,   //Value
+    UINT_FORMAT,   //Value Format
+    8,      //Value Column
+    3       //Value Row
   }
 };
 
