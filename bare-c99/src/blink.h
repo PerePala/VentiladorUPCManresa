@@ -2,7 +2,7 @@
 #define BLINK_H
 
 //Blinking frequency
-#define BLINK_FREQ 5                //The number of display refresh loops it takes to blink
+#define BLINK_FREQ 2                //The number of display refresh loops it takes to blink
 #define UNBLINK_FREQ BLINK_FREQ*2   //Same loops to unblink
 
 void update_blink_counter(void);

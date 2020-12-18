@@ -45,6 +45,7 @@ static struct vaction_params {
   int16_t exp_pause;               // in ticks
   int16_t exp_low_c;               // in ticks
   float accel;                     // in rad/s^2
+  bool are_changed;                // true = new params set
 } param = {
 	   /* default primary parameters */
 	   120, // 12 breathes per minute
@@ -52,6 +53,7 @@ static struct vaction_params {
 	   20 , // I:E ratio at 1:2
 	   100  // 100% of total travel
 };
+
 
 
 /* Update computed parameters given system constants
@@ -82,35 +84,52 @@ static void update_params(void) {
   /* rithm parameters to steps */
   param.ins_pause = ins_p * freq;
   param.exp_pause = exp_p * freq;
+  param.are_changed = false;
 }
 
 
 /* Set breathes per minute. `rr` in tenths of breathes */
 void vaction_set_rr(uint8_t rr) {
   param.rr = rr;
-  update_params();
+  param.are_changed  = true;
 }
 
 
 /* Set inspiration ramp time. `rr` in tenths of second */
 void vaction_set_ir(uint8_t ir) {
   param.ir = ir;
-  update_params();
+  param.are_changed  = true;
 }
 
 
 /* Set I:E ratio. Ratio is 1:`e`, `e` in tenths */
 void vaction_set_ie(uint8_t e) {
   param.ie = e;
-  update_params();
+  param.are_changed  = true;
 }
 
 /* Set travel. Travel in percent of max_travel */
 void vaction_set_tr(uint8_t tr) {
   param.tr = tr;
-  update_params();
+  param.are_changed  = true;
 }
 
+
+/*******************
+ * Status control
+ * ****************/
+
+typedef enum {stopped, working, stopping} status_t;
+status_t status = stopped;
+
+void start_breathe(){
+  update_params();
+  status = working;
+}
+
+void stop_breathe(){
+  if (status == working) status = stopping;
+}
 
 
 /*****************************************************************
@@ -135,6 +154,8 @@ PT_THREAD(vaction_thread(struct pt *pt))
    * breathe forever!!
    */
   for(;;) {
+    PT_WAIT_WHILE(pt, status != working);
+    
     /* inspiration rising. assume motor wind direction */
     c = (param.ir/10.0) / (param.travel-1) * freq;
     timer_set_action(motor_step);
@@ -169,7 +190,9 @@ PT_THREAD(vaction_thread(struct pt *pt))
     timer_arm_once(param.exp_pause);
     motor_reverse(); // set wind dir again
     motor_disable(); // action in rest position: break torque not needed
+    if (param.are_changed) update_params();
     PT_WAIT_WHILE(pt, timer_armed());
+    if (status == stopping) status = stopped;
   }
   
   PT_END(pt);

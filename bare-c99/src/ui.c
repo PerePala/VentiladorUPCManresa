@@ -11,12 +11,13 @@
 #include "display_items.h"
 #include "pin.h"
 #include "button.h"
+#include "switch.h"
 #include "encoder.h"
 #include "blink.h"
 #include "vaction.h"
 
 
-#define REFRESH_TIME 10  //times the ticker freq (10ms)
+#define REFRESH_TIME 50  //times the ticker freq (16ms)
 
 
 //MACHINE STATUS
@@ -42,14 +43,12 @@ uint16_t new_selected_value = 0;
 /**
  * Buttons 
  */
-#define NUM_OF_BUTTONS 6
-#define BTN_1 0
-#define BTN_2 1
-#define BTN_3 2
-#define BTN_MENU 3
-#define BTN_START 4
-#define BTN_ENC 5
-button_t buttons[NUM_OF_BUTTONS];
+switch_t btn_1;
+switch_t btn_2;
+switch_t btn_3;
+switch_t btn_menu;
+switch_t btn_start;
+switch_t btn_enc;
 
 //Encoder
 encoder_t encoder;
@@ -230,34 +229,14 @@ void display_init(void) {
  * @brief Initializes the buttons and the encoder
  */
 void buttons_init(void){
-  buttons[0] = btn_create(&PORTB, 1);
-  buttons[1] = btn_create(&PORTB, 0);
-  buttons[2] = btn_create(&PORTD, 7);
-  buttons[3] = btn_create(&PORTD, 6);
-  buttons[4] = btn_create(&PORTC, 3);
-  buttons[5] = btn_create(&PORTD, 4);
+  btn_1 = switch_bind(&PORTB, 1);
+  btn_2 = switch_bind(&PORTB, 0);
+  btn_3 = switch_bind(&PORTD, 7);
+  btn_menu = switch_bind(&PORTD, 6);
+  btn_start = switch_bind(&PORTC, 3);
+  btn_enc = switch_bind(&PORTD, 4);
+  
   encoder = enc_create(&PORTD, 2, &PORTD, 3);
-}
-
-
-/**
- * @brief Update all the button status to check if the user has pressed them
- */
-void update_buttons_status(){
-  for(uint8_t i=0; i<NUM_OF_BUTTONS; i++){
-    btn_update_status(&buttons[i]);      
-  }
-}
-
-
-/**
- * @brief   Returns true if the button number has been clicked (rising edge detected)
- * 
- * @param   btn_id The button identifier
- * @return  A boolean (true if rising edge detected)
- */
-bool is_clicked(uint8_t btn_id){
-  return buttons[btn_id].status == CLICKED;
 }
 
 
@@ -300,6 +279,7 @@ void print_changed_fields(void){
 void UI_setup(void){
   ticker_setup();
   display_init();
+  switch_setup();
   buttons_init();
   ticker_start();
 }
@@ -339,58 +319,78 @@ PT_THREAD(display_thread(struct pt *pt))
  ****************************************************************************************/
 PT_THREAD(buttons_thread(struct pt *pt))
 {
-  static uint16_t chronos2;
+  // static uint16_t chronos2;
   PT_BEGIN(pt);
 
   for(;;) {
-    chronos2 = ticker_get();
-    PT_WAIT_WHILE(pt, ticker_get() - chronos2 <= 10);
-
-    update_buttons_status();
-
-    switch (form_id) {
-      case STARTING:
-        _delay_ms(1000);            //To be changed. Simulates the homing sequence.
-        set_form(MAIN_SCREEN);
-        break;
-      case MAIN_SCREEN:
-        if (is_clicked(BTN_1)){
-          select_field(VOLUME);
-        } else if (is_clicked(BTN_2)){
-          select_field(RATIO);
-        } else if (is_clicked(BTN_3)){
-          select_field(FREQ);
-        } else if (is_clicked(BTN_MENU)){
-          set_form(MENU);
-        } else if (is_clicked(BTN_ENC) & (selected_field != NULL) ){
-          save_selected_value();
-          unselect_field();
-        } else if (is_clicked(BTN_START)){  
-          if (machine_status == STOP){                  //*** Start cycle ***
-            main_form[START_STOP].val_format = STOP_ST;
-            main_form[PLATEAU].val_format = UINT_FORMAT;
-            main_form[PEAK].val_format = UINT_FORMAT;
-            machine_status = WORKING;
-          } else if (machine_status == WORKING){        //*** Stop cycle ***
-            main_form[START_STOP].val_format = START_ST;
-            main_form[PLATEAU].val_format = OFF_ST;
-            main_form[PEAK].val_format = OFF_ST;
-            machine_status = STOP;
-          }         
-          main_form[START_STOP].is_changed = true;
-          main_form[PLATEAU].is_changed = true;
-          main_form[PEAK].is_changed = true;
-        } else if (get_position(&encoder) != 0){
-          change_value_selected_field(get_position(&encoder));
-          reset_position(&encoder);
+    if (form_id == STARTING){
+      PT_DELAY(pt, 100); //To be changed. Simulates the homing seqüence
+      set_form(MAIN_SCREEN);
+    } else if (form_id == MAIN_SCREEN){
+      //Volume button
+      switch_poll(btn_1);
+      PT_WAIT_UNTIL(pt, switch_ready(btn_1));
+      if (switch_state(btn_1) & switch_changed(btn_1)){
+        select_field(VOLUME);
+      }
+      //I:R button
+      switch_poll(btn_2);
+      PT_WAIT_UNTIL(pt, switch_ready(btn_2));
+      if (switch_state(btn_2) & switch_changed(btn_2)){
+        select_field(RATIO);
+      }
+      //Freq button
+      switch_poll(btn_3);
+      PT_WAIT_UNTIL(pt, switch_ready(btn_3));
+      if (switch_state(btn_3) & switch_changed(btn_3)){
+        select_field(FREQ);
+      }
+      //Encoder button
+      switch_poll(btn_enc);
+      PT_WAIT_UNTIL(pt, switch_ready(btn_enc));
+      if (switch_state(btn_enc) & switch_changed(btn_enc)){
+        save_selected_value();
+        unselect_field();
+      }
+      //Start/stop button
+      switch_poll(btn_start);
+      PT_WAIT_UNTIL(pt, switch_ready(btn_start));
+      if (switch_state(btn_start) & switch_changed(btn_start)){
+        if (machine_status == STOP){                  //*** Start cycle ***
+          main_form[START_STOP].val_format = STOP_ST;
+          main_form[PLATEAU].val_format = UINT_FORMAT;
+          main_form[PEAK].val_format = UINT_FORMAT;
+          machine_status = WORKING;
+          start_breathe();
+        } else if (machine_status == WORKING){        //*** Stop cycle ***
+          main_form[START_STOP].val_format = START_ST;
+          main_form[PLATEAU].val_format = OFF_ST;
+          main_form[PEAK].val_format = OFF_ST;
+          machine_status = STOP;
+          stop_breathe();
         }
-        break;
-      case MENU:
-        if (is_clicked(BTN_MENU)){
-          set_form(MAIN_SCREEN);
-        }
-        break;
+        main_form[START_STOP].is_changed = true;
+        main_form[PLATEAU].is_changed = true;
+        main_form[PEAK].is_changed = true;   
+      }
+      //Encoder rotation
+      if (get_position(&encoder) != 0){
+        change_value_selected_field(get_position(&encoder));
+        reset_position(&encoder);
+      }      
     }
+
+    if ((form_id == MAIN_SCREEN) | (form_id == MENU)){
+      //Menu button
+      switch_poll(btn_menu);
+      PT_WAIT_UNTIL(pt, switch_ready(btn_menu));
+      if (switch_state(btn_menu) & switch_changed(btn_menu)){
+        if (form_id == MAIN_SCREEN) set_form(MENU);
+        else if (form_id == MENU) set_form(MAIN_SCREEN);
+      }
+    }
+
+    PT_DELAY(pt, 10);
   }
   PT_END(pt);
 }

@@ -3,6 +3,11 @@
 
 #include "pt.h"
 
+/* Start breathing */
+void start_breathe();
+/* Stop breathing */
+void stop_breathe();
+
 /* Set breathes per minute. `rr` in tenths of breathes */
 void vaction_set_rr(uint8_t rr);
 /* Set inspiration ramp time. `rr` in tenths of second */

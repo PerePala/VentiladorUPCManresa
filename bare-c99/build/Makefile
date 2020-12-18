@@ -33,8 +33,8 @@ SRC_MAIN = main
 
 # Link rules
 
-main: vaction.o timer.o motor.o
-ui: lcdpcf8574.o pcf8574.o twimaster.o ticker.o pin.o button.o encoder.o blink.o
+main: vaction.o timer.o motor.o ui.o lcdpcf8574.o pcf8574.o twimaster.o ticker.o pin.o encoder.o blink.o switch.o
+ui: lcdpcf8574.o pcf8574.o twimaster.o ticker.o pin.o encoder.o blink.o
 test_adc: adc.o ticker.o shielditic.o alert.o pin.o
 test_adc_2: adc.o ticker.o shielditic.o alert.o pin.o
 test_lcd: lcd.o
