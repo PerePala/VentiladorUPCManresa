@@ -49,6 +49,15 @@ switch_t btn_menu;
 switch_t btn_start;
 switch_t btn_enc;
 
+#define SWITCH_ON_CLICK(btn, function_to_call) \
+  do { \
+    switch_poll(btn); \
+    PT_WAIT_UNTIL(pt, switch_ready(btn)); \
+    if (switch_state(btn) && switch_changed(btn)){ \
+      function_to_call; \
+    }; \
+  } while (0)
+
 //Encoder
 encoder_t encoder;
 #define ENCODER_REFRESH_TIME 1
@@ -327,34 +336,24 @@ PT_THREAD(buttons_thread(struct pt *pt))
       set_form(MAIN_SCREEN);
     } else if (form_id == MAIN_SCREEN){
       //Volume button
-      switch_poll(btn_1);
-      PT_WAIT_UNTIL(pt, switch_ready(btn_1));
-      if (switch_state(btn_1) & switch_changed(btn_1)){
-        select_field(VOLUME);
-      }
+      SWITCH_ON_CLICK(btn_1, select_field(VOLUME));
+
       //I:R button
-      switch_poll(btn_2);
-      PT_WAIT_UNTIL(pt, switch_ready(btn_2));
-      if (switch_state(btn_2) & switch_changed(btn_2)){
-        select_field(RATIO);
-      }
+      SWITCH_ON_CLICK(btn_2, select_field(RATIO));
+      
       //Freq button
-      switch_poll(btn_3);
-      PT_WAIT_UNTIL(pt, switch_ready(btn_3));
-      if (switch_state(btn_3) & switch_changed(btn_3)){
-        select_field(FREQ);
-      }
+      SWITCH_ON_CLICK(btn_3, select_field(FREQ));
+      
       //Encoder button
-      switch_poll(btn_enc);
-      PT_WAIT_UNTIL(pt, switch_ready(btn_enc));
-      if (switch_state(btn_enc) & switch_changed(btn_enc)){
+      SWITCH_ON_CLICK(btn_enc,
         save_selected_value();
-        unselect_field();
-      }
+        unselect_field()
+      );
+      
       //Start/stop button
       switch_poll(btn_start);
       PT_WAIT_UNTIL(pt, switch_ready(btn_start));
-      if (switch_state(btn_start) & switch_changed(btn_start)){
+      if (switch_state(btn_start) && switch_changed(btn_start)){
         if (machine_status == STOP){                  //*** Start cycle ***
           main_form[START_STOP].val_format = STOP_ST;
           main_form[PLATEAU].val_format = UINT_FORMAT;
